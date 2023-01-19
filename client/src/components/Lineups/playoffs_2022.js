@@ -179,10 +179,6 @@ const Playoffs = () => {
             {
                 text: 'Points',
                 colSpan: 2
-            },
-            {
-                text: 'Bench Points',
-                colSpan: 2
             }
         ]
     ]
@@ -195,10 +191,6 @@ const Playoffs = () => {
             },
             {
                 text: 'Points',
-                colSpan: 2
-            },
-            {
-                text: 'Bench Points',
                 colSpan: 2
             }
         ]
@@ -357,10 +349,6 @@ const Playoffs = () => {
                             {
                                 text: total_optimal[player_id].points,
                                 colSpan: 2
-                            },
-                            {
-                                text: total_optimal[player_id].points_bench,
-                                colSpan: 2
                             }
                         ]
                     }
@@ -375,11 +363,6 @@ const Playoffs = () => {
                     },
                     {
                         text: Object.keys(total_optimal).reduce((acc, cur) => acc + parseFloat(total_optimal[cur].points), 0).toFixed(2),
-                        colSpan: 2
-                    },
-                    ,
-                    {
-                        text: Object.keys(total_optimal).reduce((acc, cur) => acc + parseFloat(total_optimal[cur].points_bench), 0).toFixed(2),
                         colSpan: 2
                     }
                 ],
