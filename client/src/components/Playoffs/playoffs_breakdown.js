@@ -44,7 +44,8 @@ const PlayoffsBreakdown = ({
                 list: [
                     {
                         text: stateWeek.length === 1 ? total_optimal[player_id].slot : allplayers[player_id]?.position,
-                        colSpan: 1
+                        colSpan: 1,
+                        className: className
                     },
                     {
                         text: allplayers[player_id]?.full_name,
@@ -53,16 +54,42 @@ const PlayoffsBreakdown = ({
                     },
                     {
                         text: total_optimal[player_id].points.toFixed(2) || '0',
-                        colSpan: 2
+                        colSpan: 2,
+                        className: className
                     }
                 ]
             }
         })
 
-    return <>
+    const secondary_nav = (
         <div className="secondary nav">
+            <div>
+                <p className="green">
+                    Active: {
+                        Object.keys(total_optimal)
+                            .filter(x => !players_eliminated.includes(x))
+                            .reduce((acc, cur) => acc + total_optimal[cur].points, 0)
+                            .toFixed(2)
+                    }
+                </p>
+            </div>
+            <div>
+                <p className="red">
+                    Eliminated: {
 
+                        Object.keys(total_optimal)
+                            .filter(x => players_eliminated.includes(x))
+                            .reduce((acc, cur) => acc + total_optimal[cur].points, 0)
+                            .toFixed(2)
+
+                    }
+                </p>
+            </div>
         </div>
+    )
+
+    return <>
+        {secondary_nav}
         <TableMain
             type={'secondary'}
             headers={secondary_headers}

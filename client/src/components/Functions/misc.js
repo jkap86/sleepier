@@ -113,7 +113,10 @@ export const team_abbrev = {
     SFO: 'SF',
     JAC: 'JAX',
     KCC: 'KC',
-    TBB: 'TB'
-
+    TBB: 'TB',
+    GBP: 'GB',
+    NEP: 'NE',
+    LVR: 'LV',
+    NOS: 'NO'
 }
 

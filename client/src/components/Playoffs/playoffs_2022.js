@@ -87,40 +87,49 @@ const Playoffs = () => {
         return optimalLineup_week
     }
 
-    const start_week = stateWeek.sort((a, b) => league.schedule[a][0].kickoff - league.schedule[b][0].kickoff)[0]
-    const recent_week = stateWeek.sort((a, b) => league.schedule[b][0].kickoff - league.schedule[a][0].kickoff)[0]
-    let teams_left = []
-    let teams_eliminated = []
+    const week_sorted = stateWeek.sort((a, b) => league.schedule[a][0].kickoff - league.schedule[b][0].kickoff)
+    const start_week = week_sorted[0]
+    const end_week = week_sorted[week_sorted.length - 1]
 
-    league.schedule && league.schedule[start_week]
-        ?.map(matchup => {
-            matchup.team.map(t => {
-                return teams_left.push(team_abbrev[t.id] || t.id)
-            })
-        })
-        ?.flat()
-
-    stateWeek
-        ?.filter(x => x !== 'Week_18')
-        .map(week => {
-            league.schedule && league.schedule[week]
-
-                ?.map(matchup => {
-                    if (matchup.gameSecondsRemaining === '0') {
-                        const t = matchup.team.sort((a, b) => parseInt(a.score) - parseInt(b.score))[0]
-                        return teams_eliminated.push(team_abbrev[t?.id] || t?.id)
-                    }
+    const getWeekTeams = (week) => {
+        let teams_left = []
+        league.schedule && league.schedule[week]
+            ?.map(matchup => {
+                matchup.team.map(t => {
+                    return teams_left.push(team_abbrev[t.id] || t.id)
                 })
-                ?.flat()
-        })
-
-
-
-    if (start_week === 'WC') {
-        teams_left.push(...['KC', 'PHI'])
+            })
+            ?.flat()
+        return teams_left
     }
 
-    console.log({ teams_left: teams_left })
+    const teams_all = getWeekTeams('Week_18')
+    const playoff_teams = [...getWeekTeams('WC'), 'PHI', 'KC']
+
+    const getTeamsEliminated = () => {
+        let teams_eliminated = []
+
+        stateWeek.map(week => {
+            if (week === 'Week_18') {
+                teams_eliminated = teams_all.filter(x => !playoff_teams.includes(x))
+            } else {
+                league.schedule && league.schedule[week]
+                    ?.map(matchup => {
+                        if (matchup.gameSecondsRemaining === '0') {
+                            const t = matchup.team.sort((a, b) => parseInt(a.score) - parseInt(b.score))[0]
+                            return teams_eliminated.push(team_abbrev[t?.id] || t?.id)
+                        }
+                    })
+            }
+        })
+        return teams_eliminated
+    }
+
+
+    let teams = start_week === 'Week_18' ? teams_all : stateWeek.length > 0 ? playoff_teams : teams_all
+    let teams_eliminated = getTeamsEliminated()
+
+
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true)
@@ -277,7 +286,7 @@ const Playoffs = () => {
                 colSpan: 2
             },
             {
-                text: '# Left',
+                text: 'Players',
                 colSpan: 1
             },
             {
@@ -290,8 +299,8 @@ const Playoffs = () => {
     const summary_body = Object.keys(optimalLineups)
         .sort((a, b) => getRosterTotal(optimalLineups[b]) - getRosterTotal(optimalLineups[a]))
         .map(user_id => {
-            const players_left = optimalLineups[user_id].players.filter(x => teams_left?.includes(allplayers[x]?.team))
-            const players_eliminated = optimalLineups[user_id].players.filter(x => teams_eliminated?.includes(allplayers[x]?.team) || !teams_left.includes(allplayers[x]?.team))
+            const players_left = optimalLineups[user_id].players.filter(x => teams?.includes(allplayers[x]?.team))
+            const players_eliminated = optimalLineups[user_id].players.filter(x => teams_eliminated?.includes(allplayers[x]?.team))
             let total_optimal = {}
 
             stateWeek.map(week => {
@@ -307,13 +316,20 @@ const Playoffs = () => {
                         }
                     }
                 })
-            })
-            optimalLineups[user_id].players.filter(x => !Object.keys(total_optimal).includes(x)).map(player_id => {
-                total_optimal[player_id] = {
-                    index: players_left.includes(player_id) ? 999 : 1000,
-                    slot: 'BN',
-                    points: 0
-                }
+                optimalLineups[user_id].players
+                    .filter(x => !optimalLineups[user_id][week].map(s => s.player).includes(x))
+                    .map(player_id => {
+                        if (Object.keys(total_optimal).includes(player_id)) {
+                            total_optimal[player_id].points_bench += parseFloat(getPlayerScore(player_id, week))
+                        } else {
+                            total_optimal[player_id] = {
+                                index: players_eliminated.includes(player_id) ? 1000 : 999,
+                                slot: 'BN',
+                                points: 0,
+                                points_bench: parseFloat(getPlayerScore(player_id, week)) || 0
+                            }
+                        }
+                    })
             })
 
             return {
@@ -328,7 +344,7 @@ const Playoffs = () => {
                         colSpan: 2
                     },
                     {
-                        text: players_left.length.toString(),
+                        text: (players_left.length).toString(),
                         colSpan: 1
                     },
                     {
@@ -353,6 +369,31 @@ const Playoffs = () => {
     return isLoading ? 'Loading' : <>
 
         <h1>{league.league?.name}</h1>
+        <span>
+            {
+                (start_week || '')
+                    .replace('_', ' ')
+                    .replace('WC', 'Wild Card Round')
+                    .replace('DIV', 'Divisional Round')
+                    .replace('CONf', 'Conference Championship')
+                    .replace('SB', 'Super Bowl')
+            }
+        </span>
+        {end_week === start_week ? null :
+            <>
+                &nbsp;--&nbsp;
+                <span>
+                    {
+                        (end_week || '')
+                            .replace('_', ' ')
+                            .replace('WC', 'Wild Card Round')
+                            .replace('DIV', 'Divisional Round')
+                            .replace('CONf', 'Conference Championship')
+                            .replace('SB', 'Super Bowl')
+                    }
+                </span>
+            </>
+        }
         <div className="primary nav">
             {
                 Object.keys(scoring)
