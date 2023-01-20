@@ -7,13 +7,12 @@ const { Playoffs_Scoring } = require('./playoffs_scoring');
 
 const bootServer = async (app, axios, db) => {
     const state = await axios.get('https://api.sleeper.app/v1/state/nfl')
-    app.set('state', state.data)
+    await app.set('state', state.data)
 
     const allplayers = await getAllPlayers(axios, state.data)
     app.set('allplayers', allplayers)
 
-    const schedule = await axios.get(`https://api.myfantasyleague.com/${state.data.season}/export?TYPE=nflSchedule&JSON=1`)
-    app.set('schedule', schedule.data)
+
 
     let leagues_table = {};
     let trades_table = {};

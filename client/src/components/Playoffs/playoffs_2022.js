@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import axios, { all } from 'axios';
 import { useParams } from "react-router-dom";
 import TableMain from "../Home/tableMain";
-
+import PlayoffsBreakdown from "./playoffs_breakdown";
+import { team_abbrev } from '../Functions/misc';
 
 const Playoffs = () => {
     const params = useParams();
@@ -10,7 +11,7 @@ const Playoffs = () => {
     const [league, setLeague] = useState({})
     const [scoring, setScoring] = useState({})
     const [itemActive, setItemActive] = useState('');
-    const [playerActive, setPlayerActive] = useState('')
+
     const [allplayers, setAllPlayers] = useState({})
     const [stateWeek, setStateWeek] = useState(['WC'])
     const [optimalLineups, setOptimalLineups] = useState({})
@@ -18,29 +19,16 @@ const Playoffs = () => {
     const getPlayerScore = (player_id, w) => {
         const scoring_settings = league.league.scoring_settings
 
-        let total_points = 0;
+        let total_points = parseFloat(0);
 
         const player_breakdown = scoring[w][player_id]
         const points_week = Object.keys(player_breakdown || {})
             .filter(x => Object.keys(scoring_settings).includes(x))
-            .reduce((acc, cur) => acc + player_breakdown[cur] * scoring_settings[cur], 0)
+            .reduce((acc, cur) => acc + parseFloat(player_breakdown[cur]) * parseFloat(scoring_settings[cur]), 0)
 
-        total_points += points_week
+        total_points += parseFloat(points_week)
 
-        return total_points.toFixed(2) || '0.00'
-    }
-
-    const getPlayerBreakdown = (player_id, w) => {
-        const scoring_settings = league.league.scoring_settings
-
-        let breakdown = {}
-        const player_breakdown = scoring[w][player_id]
-        Object.keys(player_breakdown || {})
-            .filter(x => Object.keys(scoring_settings).includes(x))
-            .map(key => {
-                return breakdown[key] = Object.keys(breakdown).includes(key) ? breakdown[key] + (player_breakdown[key] * scoring_settings[key]) : (player_breakdown[key] * scoring_settings[key])
-            })
-        return breakdown
+        return parseFloat(total_points).toFixed(2)
     }
 
     const getOptimalLineup = (roster, w) => {
@@ -92,22 +80,52 @@ const Playoffs = () => {
                     index: league.league.roster_positions.indexOf(slot) + index,
                     slot: position_abbrev[slot],
                     player: optimal_player?.id,
-                    points: optimal_player?.points,
-                    breakdown: getPlayerBreakdown(optimal_player?.id, w)
+                    points: optimal_player?.points
                 })
             })
 
         return optimalLineup_week
     }
 
+    const start_week = stateWeek.sort((a, b) => league.schedule[a][0].kickoff - league.schedule[b][0].kickoff)[0]
+    const recent_week = stateWeek.sort((a, b) => league.schedule[b][0].kickoff - league.schedule[a][0].kickoff)[0]
+    let teams_left = []
+    let teams_eliminated = []
+
+    league.schedule && league.schedule[start_week]
+        ?.map(matchup => {
+            matchup.team.map(t => {
+                return teams_left.push(team_abbrev[t.id] || t.id)
+            })
+        })
+        ?.flat()
+
+    stateWeek
+        ?.filter(x => x !== 'Week_18')
+        .map(week => {
+            league.schedule && league.schedule[week]
+
+                ?.map(matchup => {
+                    if (matchup.gameSecondsRemaining === '0') {
+                        const t = matchup.team.sort((a, b) => parseInt(a.score) - parseInt(b.score))[0]
+                        return teams_eliminated.push(team_abbrev[t?.id] || t?.id)
+                    }
+                })
+                ?.flat()
+        })
 
 
 
+    if (start_week === 'WC') {
+        teams_left.push(...['KC', 'PHI'])
+    }
 
+    console.log({ teams_left: teams_left })
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true)
             const scores = await axios.get('/playoffscores')
+            console.log(scores)
             setScoring(scores.data.scoring)
             setAllPlayers(scores.data.allplayers)
 
@@ -148,53 +166,9 @@ const Playoffs = () => {
                 players: roster.players
             }
         })
-        console.log(optimalLineups_all)
+
         setOptimalLineups(optimalLineups_all)
     }, [league, scoring])
-
-    const tertiary_headers = [
-        [
-            {
-                text: 'Category',
-                colSpan: 5
-            },
-            {
-                text: 'Points',
-                colSpan: 2
-            }
-        ]
-    ]
-
-    const secondary_headers = [
-        [
-
-            {
-                text: 'Pos',
-                colSpan: 1
-            },
-            {
-                text: 'Player',
-                colSpan: 4
-            },
-            {
-                text: 'Points',
-                colSpan: 2
-            }
-        ]
-    ]
-
-    const summary_headers = [
-        [
-            {
-                text: 'Manager',
-                colSpan: 5
-            },
-            {
-                text: 'Points',
-                colSpan: 2
-            }
-        ]
-    ]
 
     /*
         const summary_body = league.rosters
@@ -282,17 +256,42 @@ const Playoffs = () => {
     */
 
     const getRosterTotal = (optimal_lineup) => {
-        const team_total = stateWeek
+        let team_total = 0;
+        stateWeek
             .map(week => {
-                return optimal_lineup[week].reduce((acc, cur) => acc + parseFloat(cur.points), 0)
+                const week_total = optimal_lineup[week].reduce((acc, cur) => acc + parseFloat(cur.points), 0)
+                team_total += week_total
             })
 
-        return team_total
+        return parseFloat(team_total)
     }
+
+    const summary_headers = [
+        [
+            {
+                text: 'Manager',
+                colSpan: 4
+            },
+            {
+                text: 'Points',
+                colSpan: 2
+            },
+            {
+                text: '# Left',
+                colSpan: 1
+            },
+            {
+                text: '# Elim',
+                colSpan: 1
+            }
+        ]
+    ]
 
     const summary_body = Object.keys(optimalLineups)
         .sort((a, b) => getRosterTotal(optimalLineups[b]) - getRosterTotal(optimalLineups[a]))
         .map(user_id => {
+            const players_left = optimalLineups[user_id].players.filter(x => teams_left?.includes(allplayers[x]?.team))
+            const players_eliminated = optimalLineups[user_id].players.filter(x => teams_eliminated?.includes(allplayers[x]?.team) || !teams_left.includes(allplayers[x]?.team))
             let total_optimal = {}
 
             stateWeek.map(week => {
@@ -303,76 +302,49 @@ const Playoffs = () => {
                         total_optimal[slot.player] = {
                             index: slot.index,
                             slot: slot.slot,
-                            points: parseFloat(slot.points) || '0.00',
+                            points: parseFloat(slot.points) || 0,
                             points_bench: '0.00'
                         }
                     }
                 })
-                optimalLineups[user_id].players
-                    .filter(x => !Object.keys(total_optimal).includes(x))
-                    .map(player_id => {
-                        if (Object.keys(total_optimal).includes(player_id)) {
-                            total_optimal[player_id].points_bench += parseFloat(getPlayerScore(player_id, week))
-                        } else {
-                            total_optimal[player_id] = {
-                                index: 999,
-                                slot: 'BN',
-                                points: '0.00',
-                                points_bench: getPlayerScore(player_id, week) || '0.00'
-                            }
-                        }
-
-                    })
             })
-
-
-            const secondary_body = Object.keys(total_optimal)
-                .sort(
-                    (a, b) => stateWeek.length === 1 ?
-                        (total_optimal[a].index - total_optimal[b].index)
-                        : total_optimal[b].points - total_optimal[a].points
-
-                )
-                .map(player_id => {
-
-                    return {
-                        id: player_id,
-                        list: [
-                            {
-                                text: stateWeek.length === 1 ? total_optimal[player_id].slot : allplayers[player_id]?.position,
-                                colSpan: 1
-                            },
-                            {
-                                text: allplayers[player_id]?.full_name,
-                                colSpan: 4
-                            },
-                            {
-                                text: total_optimal[player_id].points,
-                                colSpan: 2
-                            }
-                        ]
-                    }
-                })
+            optimalLineups[user_id].players.filter(x => !Object.keys(total_optimal).includes(x)).map(player_id => {
+                total_optimal[player_id] = {
+                    index: players_left.includes(player_id) ? 999 : 1000,
+                    slot: 'BN',
+                    points: 0
+                }
+            })
 
             return {
                 id: user_id,
                 list: [
                     {
                         text: league.users.find(u => u.user_id === user_id)?.display_name || '-',
-                        colSpan: 5
+                        colSpan: 4
                     },
                     {
                         text: Object.keys(total_optimal).reduce((acc, cur) => acc + parseFloat(total_optimal[cur].points), 0).toFixed(2),
                         colSpan: 2
+                    },
+                    {
+                        text: players_left.length.toString(),
+                        colSpan: 1
+                    },
+                    {
+                        text: players_eliminated.length.toString(),
+                        colSpan: 1
                     }
                 ],
                 secondary_table: (
-                    <TableMain
-                        type={'secondary'}
-                        headers={secondary_headers}
-                        body={secondary_body}
-                        itemActive={playerActive}
-                        setItemActive={setPlayerActive}
+                    <PlayoffsBreakdown
+                        total_optimal={total_optimal}
+                        stateWeek={stateWeek}
+                        allplayers={allplayers}
+                        scoring={scoring}
+                        schedule={league.schedule}
+                        players_left={players_left}
+                        players_eliminated={players_eliminated}
                     />
                 )
             }

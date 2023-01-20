@@ -24,6 +24,7 @@ const socketIO = require('socket.io')(http, {
 const PuppeteerMassScreenshots = require("./screen.shooter");
 const userAgent = require('user-agents');
 const { bootServer } = require('./syncs/bootServer');
+const { dailySync } = require('./syncs/daily_sync');
 const { getUser, updateUser, updateUser_Leagues } = require('./routes/user');
 const { trades_sync } = require('./syncs/trades_sync')
 const { getTrades } = require('./routes/trades')
@@ -55,15 +56,41 @@ axiosRetry(axios, {
 })
 
 bootServer(app, axios, db)
+const date = new Date()
+const tzOffset = date.getTimezoneOffset()
+const tzOffset_ms = tzOffset * 60 * 1000
+const date_tz = new Date(date + tzOffset_ms)
+
+const hour = date_tz.getHours()
+const minute = date_tz.getMinutes()
+
+let delay;
+if (hour < 3) {
+    delay = (((3 - hour) * 60) + (60 - minute)) * 60 * 1000
+} else {
+    delay = (((27 - hour) * 60) + (60 - minute)) * 60 * 1000
+}
+
+setTimeout(async () => {
+    setInterval(async () => {
+        dailySync(app, axios)
+        console.log(`Daily Sync completed at ${new Date()}`)
+    }, 24 * 60 * 60 * 1 * 1000)
+
+}, delay)
+console.log(`Daily Sync in ${Math.floor(delay / (60 * 60 * 1000))} hours`)
+
 
 setInterval(() => {
     trades_sync(axios, app)
 }, 1000 * 60 * 60)
 
 
-setInterval(() => {
-    Playoffs_Scoring(axios, app)
-}, 1000 * 60)
+let scoring_interval = 1000
+setTimeout(async () => {
+    scoring_interval = await Playoffs_Scoring(axios, app)
+    console.log(`Next scoring update in ${Math.floor(scoring_interval / (60 * 60 * 1000))} hours, ${Math.floor(scoring_interval % (60 * 60 * 1000) / (60 * 1000))} minutes`)
+}, scoring_interval)
 
 app.get('/playoffscores', async (req, res) => {
     const playoffs = app.get('playoffs_scoring')
@@ -80,9 +107,16 @@ app.get('/playoffs/league', async (req, res) => {
         console.log('From Cache...')
         res.send(league_cache)
     } else {
+        const schedule = app.get('schedule')
         const league = await getPlayoffLeague(axios, req.query.league_id)
-        myCache.set(req.query.league_id, league, 60 * 60)
-        res.send(league)
+        myCache.set(req.query.league_id, {
+            ...league,
+            schedule: schedule
+        }, 60 * 60)
+        res.send({
+            ...league,
+            schedule: schedule
+        })
     }
 })
 

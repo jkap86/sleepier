@@ -2,7 +2,7 @@ import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Homepage from './components/Home/homepage';
 import Main from './components/Home/main';
-import Playoffs from './components/Lineups/playoffs_2022';
+import Playoffs from './components/Playoffs/playoffs_2022';
 
 function App() {
   return (

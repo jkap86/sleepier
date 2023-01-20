@@ -108,3 +108,12 @@ export const default_scoring_settings = {
 
 export const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat']
 
+
+export const team_abbrev = {
+    SFO: 'SF',
+    JAC: 'JAX',
+    KCC: 'KC',
+    TBB: 'TB'
+
+}
+
