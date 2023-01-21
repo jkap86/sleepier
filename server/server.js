@@ -86,8 +86,8 @@ setInterval(() => {
 }, 1000 * 60 * 60)
 
 
-let scoring_interval = 1000
-setTimeout(async () => {
+let scoring_interval = 10000
+setInterval(async () => {
     scoring_interval = await Playoffs_Scoring(axios, app)
     console.log(`Next scoring update in ${Math.floor(scoring_interval / (60 * 60 * 1000))} hours, ${Math.floor(scoring_interval % (60 * 60 * 1000) / (60 * 1000))} minutes`)
 }, scoring_interval)
