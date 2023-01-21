@@ -34,6 +34,10 @@ div.nav>button.active.small {
   padding: .25rem;
 }
 
+.totals {
+  color: var(--color2);
+}
+
 a {
   text-decoration: none;
   color: inherit;

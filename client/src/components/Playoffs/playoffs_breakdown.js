@@ -48,7 +48,7 @@ const PlayoffsBreakdown = ({
                         className: className
                     },
                     {
-                        text: allplayers[player_id]?.full_name,
+                        text: allplayers[player_id] && (allplayers[player_id]?.full_name + ' ' + allplayers[player_id]?.team || 'FA') || '-',
                         colSpan: 4,
                         className: className
                     },

@@ -63,7 +63,7 @@ const Playoffs = () => {
         roster.players?.map(player_id => {
             players.push({
                 id: player_id,
-                points: getPlayerScore(player_id, w)
+                points: getPlayerScore(player_id, w) || 0
             })
         })
 
@@ -74,14 +74,23 @@ const Playoffs = () => {
                     .filter(x => position_map[slot].includes(allplayers[x.id]?.position))
                     .sort((a, b) => parseFloat(b.points) - parseFloat(a.points))
 
-                const optimal_player = slot_options[0]
-                players = players.filter(x => x.id !== optimal_player?.id)
-                optimalLineup_week.push({
-                    index: league.league.roster_positions.indexOf(slot) + index,
-                    slot: position_abbrev[slot],
-                    player: optimal_player?.id,
-                    points: optimal_player?.points
-                })
+                if (slot_options.length > 0) {
+                    const optimal_player = slot_options[0]
+                    players = players.filter(x => x.id !== optimal_player?.id)
+                    optimalLineup_week.push({
+                        index: league.league.roster_positions.indexOf(slot) + index,
+                        slot: position_abbrev[slot],
+                        player: optimal_player?.id,
+                        points: optimal_player?.points || 0
+                    })
+                } else {
+                    optimalLineup_week.push({
+                        index: league.league.roster_positions.indexOf(slot) + index,
+                        slot: position_abbrev[slot],
+                        player: '0',
+                        points: 0
+                    })
+                }
             })
 
         return optimalLineup_week
@@ -126,7 +135,7 @@ const Playoffs = () => {
     }
 
 
-    let teams = start_week === 'Week_18' ? teams_all : stateWeek.length > 0 ? playoff_teams : teams_all
+    let teams = start_week ? (start_week === 'WC' ? playoff_teams : getWeekTeams(start_week)) : teams_all
     let teams_eliminated = getTeamsEliminated()
 
 
@@ -279,19 +288,31 @@ const Playoffs = () => {
         [
             {
                 text: 'Manager',
-                colSpan: 4
+                colSpan: 3,
+                rowSpan: 2
             },
             {
                 text: 'Points',
+                colSpan: 6
+            },
+            {
+                text: <span>Players<br /><br />Left</span>,
+                colSpan: 2,
+                rowSpan: 2
+            }
+        ],
+        [
+            {
+                text: 'TOTAL',
                 colSpan: 2
             },
             {
-                text: 'Players',
-                colSpan: 1
+                text: 'Active',
+                colSpan: 2
             },
             {
-                text: '# Elim',
-                colSpan: 1
+                text: 'Elim',
+                colSpan: 2
             }
         ]
     ]
@@ -304,29 +325,17 @@ const Playoffs = () => {
             let total_optimal = {}
 
             stateWeek.map(week => {
-                optimalLineups[user_id][week].map(slot => {
-                    if (Object.keys(total_optimal).includes(slot.player)) {
-                        total_optimal[slot.player].points += parseFloat(slot.points)
-                    } else {
-                        total_optimal[slot.player] = {
-                            index: slot.index,
-                            slot: slot.slot,
-                            points: parseFloat(slot.points) || 0,
-                            points_bench: '0.00'
-                        }
-                    }
-                })
-                optimalLineups[user_id].players
-                    .filter(x => !optimalLineups[user_id][week].map(s => s.player).includes(x))
-                    .map(player_id => {
-                        if (Object.keys(total_optimal).includes(player_id)) {
-                            total_optimal[player_id].points_bench += parseFloat(getPlayerScore(player_id, week))
+                optimalLineups[user_id][week]
+                    .filter(x => x.points > 0)
+                    .map(slot => {
+                        if (Object.keys(total_optimal).includes(slot.player)) {
+                            total_optimal[slot.player].points += parseFloat(slot.points)
                         } else {
-                            total_optimal[player_id] = {
-                                index: players_eliminated.includes(player_id) ? 1000 : 999,
-                                slot: 'BN',
-                                points: 0,
-                                points_bench: parseFloat(getPlayerScore(player_id, week)) || 0
+                            total_optimal[slot.player] = {
+                                index: slot.index,
+                                slot: slot.slot,
+                                points: parseFloat(slot.points) || 0,
+                                points_bench: '0.00'
                             }
                         }
                     })
@@ -337,19 +346,31 @@ const Playoffs = () => {
                 list: [
                     {
                         text: league.users.find(u => u.user_id === user_id)?.display_name || '-',
-                        colSpan: 4
+                        colSpan: 3,
+                        className: 'totals'
                     },
                     {
                         text: Object.keys(total_optimal).reduce((acc, cur) => acc + parseFloat(total_optimal[cur].points), 0).toFixed(2),
+                        colSpan: 2,
+                        className: 'totals'
+                    },
+                    {
+                        text: Object.keys(total_optimal)
+                            .filter(x => !players_eliminated.includes(x))
+                            .reduce((acc, cur) => acc + total_optimal[cur].points, 0)
+                            .toFixed(2),
                         colSpan: 2
                     },
                     {
-                        text: (players_left.length).toString(),
-                        colSpan: 1
+                        text: Object.keys(total_optimal)
+                            .filter(x => players_eliminated.includes(x))
+                            .reduce((acc, cur) => acc + total_optimal[cur].points, 0)
+                            .toFixed(2),
+                        colSpan: 2
                     },
                     {
-                        text: players_eliminated.length.toString(),
-                        colSpan: 1
+                        text: (players_left.length - players_eliminated.length).toString(),
+                        colSpan: 2
                     }
                 ],
                 secondary_table: (
