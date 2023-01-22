@@ -107,9 +107,9 @@ const Playoffs = () => {
         return optimalLineup_week
     }
 
-    const week_sorted = stateWeek.sort((a, b) => league.schedule[a][0].kickoff - league.schedule[b][0].kickoff)
-    const start_week = week_sorted[0]
-    const end_week = week_sorted[week_sorted.length - 1]
+    const week_sorted = league.schedule && stateWeek.sort((a, b) => league.schedule[a][0].kickoff - league.schedule[b][0].kickoff)
+    const start_week = week_sorted && week_sorted[0]
+    const end_week = week_sorted && week_sorted[week_sorted.length - 1]
 
     const getWeekTeams = (week) => {
         let teams_left = []
