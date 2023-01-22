@@ -38,7 +38,6 @@ const bootServer = async (app, axios, db) => {
     app.set('leagues_table', leagues_table)
     app.set('trades_table', trades_table)
 
-    Playoffs_Scoring(axios, app, serverBoot = true)
 }
 
 module.exports = {

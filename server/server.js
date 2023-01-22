@@ -86,11 +86,22 @@ setInterval(() => {
 }, 1000 * 60 * 60)
 
 
-let scoring_interval = 10000
-setInterval(async () => {
-    scoring_interval = await Playoffs_Scoring(axios, app)
+
+
+const playoffs_sync = async () => {
+    let scoring_interval = await Playoffs_Scoring(axios, app)
     console.log(`Next scoring update in ${Math.floor(scoring_interval / (60 * 60 * 1000))} hours, ${Math.floor(scoring_interval % (60 * 60 * 1000) / (60 * 1000))} minutes`)
-}, scoring_interval)
+    setTimeout(() => {
+        playoffs_sync()
+    }, scoring_interval)
+}
+
+
+playoffs_sync()
+
+
+
+
 
 app.get('/playoffscores', async (req, res) => {
     const playoffs = app.get('playoffs_scoring')

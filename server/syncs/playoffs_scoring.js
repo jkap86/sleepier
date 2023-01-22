@@ -4,7 +4,7 @@ const bootServer = require("./bootServer")
 const Playoffs_Scoring = async (axios, app) => {
     const state = await app.get('state')
     if (!state) {
-        console.log('server boot not complete')
+
         return 1000
     }
     const rounds = ['Week_18', 'WC', 'DIV', 'CONF', 'SB']
@@ -52,7 +52,11 @@ const Playoffs_Scoring = async (axios, app) => {
     }
 
 
-    const nextKickoff = Math.min(...schedule[rounds[week]].map(m => parseInt(m.kickoff)))
+    const nextKickoff = Math.min(
+        ...schedule[rounds[week]]
+            .filter(x => x.gameSecondsRemaining !== '0')
+            .map(m => parseInt(m.kickoff))
+    )
     if ((nextKickoff * 1000) - Date.now() > 0) {
         console.log('No Games in Progress..')
 
@@ -90,7 +94,7 @@ const Playoffs_Scoring = async (axios, app) => {
 
     console.log(`Games in Progress...`)
 
-    return (60 * 1000)
+    return (30 * 1000)
 }
 
 module.exports = {
