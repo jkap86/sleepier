@@ -92,6 +92,12 @@ const Playoffs_Scoring = async (axios, app) => {
 
     app.set('playoffs_scoring', player_scores)
 
+    const updated_schedule_week = await axios.get(`https://api.myfantasyleague.com/${state.season}/export?TYPE=nflSchedule&JSON=1`)
+
+    schedule[rounds[week]] = updated_schedule_week.data.nflSchedule.matchup
+
+    app.set('schedule', schedule)
+
     console.log(`Games in Progress...`)
 
     return (30 * 1000)

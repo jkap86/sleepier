@@ -13,7 +13,7 @@ const Playoffs = () => {
     const [itemActive, setItemActive] = useState('');
 
     const [allplayers, setAllPlayers] = useState({})
-    const [stateWeek, setStateWeek] = useState(['WC'])
+    const [stateWeek, setStateWeek] = useState([])
     const [optimalLineups, setOptimalLineups] = useState({})
 
     const getPlayerScore = (player_id, w) => {
@@ -157,7 +157,7 @@ const Playoffs = () => {
             console.log(scores)
             setScoring(scores.data.scoring)
             setAllPlayers(scores.data.allplayers)
-
+            setStateWeek(Object.keys(scores.data.scoring).filter(x => x !== 'Week_18'))
             const league_data = await axios.get('/playoffs/league', {
                 params: {
                     league_id: params.league_id
@@ -174,6 +174,7 @@ const Playoffs = () => {
         const getScoringUpdates = setInterval(async () => {
             const scores = await axios.get('/playoffscores')
             setScoring(scores.data.scoring)
+
         }, 60 * 1000)
 
         return () => {
