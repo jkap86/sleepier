@@ -93,6 +93,17 @@ const Playoffs = () => {
                 }
             })
 
+        roster.players
+            ?.filter(player_id => !optimalLineup_week.find(x => x.player === player_id))
+            ?.map(player_id => {
+                optimalLineup_week.push({
+                    index: teams_eliminated.includes(allplayers[player_id]?.team) ? 1000 : 999,
+                    slot: 'BN',
+                    player: player_id,
+                    points: 0
+                })
+            })
+
         return optimalLineup_week
     }
 
@@ -326,7 +337,7 @@ const Playoffs = () => {
 
             stateWeek.map(week => {
                 optimalLineups[user_id][week]
-                    .filter(x => x.points > 0)
+                    .filter(x => x.player !== '0')
                     .map(slot => {
                         if (Object.keys(total_optimal).includes(slot.player)) {
                             total_optimal[slot.player].points += parseFloat(slot.points)
