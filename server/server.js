@@ -81,10 +81,6 @@ setTimeout(async () => {
 console.log(`Daily Sync in ${Math.floor(delay / (60 * 60 * 1000))} hours`)
 
 
-setInterval(() => {
-    trades_sync(axios, app)
-}, 1000 * 60 * 60)
-
 
 
 
