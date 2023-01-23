@@ -61,8 +61,7 @@ const Playoffs_Scoring = async (axios, app) => {
         console.log('No Games in Progress..')
 
 
-        return (nextKickoff * 1000) - Date.now()
-
+        return Math.min(60 * 60 * 1000, (nextKickoff * 1000) - Date.now())
     }
     let player_scores = {}
 
