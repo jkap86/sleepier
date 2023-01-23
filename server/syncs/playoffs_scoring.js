@@ -51,7 +51,6 @@ const Playoffs_Scoring = async (axios, app) => {
         return 5000
     }
 
-
     const nextKickoff = Math.min(
         ...schedule[rounds[week]]
             .filter(x => x.gameSecondsRemaining !== '0')
@@ -93,7 +92,7 @@ const Playoffs_Scoring = async (axios, app) => {
 
     const updated_schedule_week = await axios.get(`https://api.myfantasyleague.com/${state.season}/export?TYPE=nflSchedule&JSON=1`)
 
-    schedule[rounds[week]] = updated_schedule_week.data.nflSchedule.matchup
+    schedule[rounds[updated_schedule_week.data.nflSchedule.week - 18]] = updated_schedule_week.data.nflSchedule.matchup
 
     app.set('schedule', schedule)
 
