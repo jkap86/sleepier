@@ -1,6 +1,8 @@
 
 
 export const getLeagueData = (leagues, user_id, state, query_season) => {
+
+    console.log({ LEAGUES: leagues })
     let players_all = [];
     let leaguemates_all = [];
     let matchups_all = []
@@ -37,7 +39,7 @@ export const getLeagueData = (leagues, user_id, state, query_season) => {
                     )) || (league.users.find(x =>
                         roster.co_owners?.includes(x.user_id)
                     )) || {
-                        display_name: 'Orphan',
+                        username: 'Orphan',
                         user_id: 0
                     },
                     wins: roster.settings.wins,
@@ -107,7 +109,7 @@ export const getLeagueData = (leagues, user_id, state, query_season) => {
         if (index === -1) {
             leaguematesCount.push({
                 user_id: lm.user_id,
-                display_name: lm.display_name,
+                username: lm.username,
                 avatar: lm.avatar,
                 leagues: leaguemates_all.filter(x => x.user_id === lm.user_id).map(x => x.league)
             })

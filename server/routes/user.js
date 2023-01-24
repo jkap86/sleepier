@@ -36,7 +36,7 @@ const updateUser = async (axios, app, req) => {
         }
         if (user_db) {
             await users_table.update({
-                username: req.user.display_name,
+                username: req.user.username,
                 avatar: req.user.avatar,
                 [`${req.query.season}_leagues`]: league_ids
             }, {
@@ -121,7 +121,7 @@ const updateUser_Leagues = async (axios, app, req) => {
                     users: users.data.map(user => {
                         return {
                             user_id: user.user_id,
-                            display_name: user.display_name,
+                            username: user.display_name,
                             avatar: user.avatar
                         }
                     }),
@@ -208,7 +208,7 @@ const updateUser_Leagues = async (axios, app, req) => {
                     users: users.data.map(user => {
                         return {
                             user_id: user.user_id,
-                            display_name: user.display_name,
+                            username: user.display_name,
                             avatar: user.avatar
                         }
                     }),
