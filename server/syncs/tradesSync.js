@@ -27,7 +27,7 @@ const updateTrades = async (app, axios) => {
     const trades_table = app.get('trades_table')
 
     const leagues_to_update = await leagues_table[Object.keys(leagues_table)[Object.keys(leagues_table).length - 1]].findAll({
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'ASC']],
         offset: i,
         limit: increment
     })
@@ -53,12 +53,12 @@ const updateTrades = async (app, axios) => {
             return transactions_league.data
                 .map(transaction => {
                     const managers = transaction.roster_ids.map(roster_id => {
-                        const user = league.dataValues.rosters.find(x => x.roster_id === roster_id)
+                        const user = league.dataValues.rosters?.find(x => x.roster_id === roster_id)
 
                         return {
                             user_id: user?.user_id,
                             avatar: user?.avatar,
-                            username: user?.username,
+                            username: user?.username || 'Orphan',
                             roster_id: roster_id
                         }
                     })
