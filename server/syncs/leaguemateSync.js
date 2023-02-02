@@ -28,7 +28,7 @@ const updateLeaguemates = async (app, axios) => {
         const season = Object.keys(leaguemates)[s]
 
 
-        while (api_calls < 500 && Object.keys(leaguemates[season]).length > 0) {
+        while (api_calls < 300 && Object.keys(leaguemates[season]).length > 0) {
 
             const leaguemate_season = Object.keys(leaguemates[season]).sort((a, b) => a - b)[0]
 

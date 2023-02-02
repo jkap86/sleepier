@@ -21,7 +21,7 @@ const updateTrades = async (app, axios) => {
     const state = app.get('state')
 
     let i = app.get('trades_sync_counter')
-    const increment = 500
+    const increment = 300
 
     const leagues_table = app.get('leagues_table')
     const trades_table = app.get('trades_table')
