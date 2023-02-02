@@ -1,7 +1,7 @@
 
 
 const tradesSync = async (app, axios) => {
-    let interval = 5 * 60 * 1000
+    let interval = 1 * 60 * 1000
 
     setTimeout(async () => {
         await updateTrades(app, axios)
@@ -91,7 +91,8 @@ const updateTrades = async (app, axios) => {
                                 avatar: league.avatar
                             },
                             users: league.users,
-                            rosters: league.rosters
+                            rosters: league.rosters,
+                            drafts: league.drafts
                         })
                     }
 
@@ -100,7 +101,7 @@ const updateTrades = async (app, axios) => {
     )
 
     try {
-        await trades_table[state.league_season].bulkCreate(transactions_week, { ignoreDuplicates: true })
+        await trades_table[state.league_season].bulkCreate(transactions_week, { updateOnDuplicate: ['drafts'] })
     } catch (error) {
         console.log(error)
     }

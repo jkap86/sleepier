@@ -30,6 +30,9 @@ const trades = (db, season) => {
         },
         draft_picks: {
             type: Sequelize.JSONB
+        },
+        drafts: {
+            type: Sequelize.JSONB
         }
     })
 }

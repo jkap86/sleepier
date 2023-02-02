@@ -21,7 +21,7 @@ const Trades = ({
         setStateTrades(propTrades)
     }, [params.username])
 
-
+    console.log({ propTrades: propTrades })
     useEffect(() => {
         const filterTrades = () => {
             let trades = stateTrades
@@ -53,7 +53,7 @@ const Trades = ({
         }
 
         filterTrades()
-    }, [stateTrades, searched_player, searched_manager])
+    }, [stateTrades, searched_player, searched_manager, searched_player2])
 
     const trades_headers = [
         [
