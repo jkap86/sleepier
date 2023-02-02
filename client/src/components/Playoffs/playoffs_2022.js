@@ -355,7 +355,7 @@ const Playoffs = () => {
 
             return {
                 id: user_id,
-                list: [
+                list: [[
                     {
                         text: league.users.find(u => u.user_id === user_id)?.display_name || '-',
                         colSpan: 3,
@@ -384,7 +384,7 @@ const Playoffs = () => {
                         text: (players_left.length - players_eliminated.length).toString(),
                         colSpan: 2
                     }
-                ],
+                ]],
                 secondary_table: (
                     <PlayoffsBreakdown
                         total_optimal={total_optimal}

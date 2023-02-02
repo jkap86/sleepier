@@ -2,7 +2,6 @@
 
 export const getLeagueData = (leagues, user_id, state, query_season) => {
 
-    console.log({ LEAGUES: leagues })
     let players_all = [];
     let leaguemates_all = [];
     let matchups_all = []
@@ -26,7 +25,11 @@ export const getLeagueData = (leagues, user_id, state, query_season) => {
                     ),
                     rosters: league.rosters,
                     userRoster: league.userRoster,
-                    users: league.users,
+                    manager: {
+                        user_id: roster.user_id,
+                        username: roster.username,
+                        avatar: roster.avatar
+                    },
                     scoring_settings: league.scoring_settings,
                     rank: roster.rank,
                     rank_pts: roster.rank_points,
@@ -34,14 +37,6 @@ export const getLeagueData = (leagues, user_id, state, query_season) => {
                     roster_positions: league.roster_positions,
                     type: league.type,
                     best_ball: league.best_ball,
-                    manager: (league.users.find(x =>
-                        x.user_id === roster.owner_id
-                    )) || (league.users.find(x =>
-                        roster.co_owners?.includes(x.user_id)
-                    )) || {
-                        username: 'Orphan',
-                        user_id: 0
-                    },
                     wins: roster.settings.wins,
                     losses: roster.settings.losses,
                     ties: roster.settings.ties,
@@ -51,24 +46,23 @@ export const getLeagueData = (leagues, user_id, state, query_season) => {
             })
         })
 
-        league.users.map(user => {
-            let lmRoster = league.rosters.find(x =>
-                x.owner_id === user.user_id ||
-                x.co_owners?.includes(user.user_id)
-            )
-            if (lmRoster?.players) {
+        league.rosters.map(roster => {
+
+            if (roster.players) {
                 leaguemates_all.push({
-                    ...user,
+                    user_id: roster.user_id,
+                    username: roster.username,
+                    avatar: roster.avatar,
                     league: {
                         ...league,
-                        lmRoster: lmRoster
+                        lmRoster: roster
                     }
                 })
             }
         })
 
 
-        const week = query_season === state.league_season ? state.week
+        const week = query_season === state.league_season && state.season_type !== 'post' ? state.week
             : query_season < state.league_season ? 18
                 : 0
 

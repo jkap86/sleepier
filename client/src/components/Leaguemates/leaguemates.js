@@ -62,9 +62,6 @@ const Leaguemates = ({
     ]
 
 
-    console.log({
-        stateLeaguemates: stateLeaguemates
-    })
     const leaguemates_body = stateLeaguemates
         .filter(x => x.username !== state_user.username)
         .sort((a, b) => b.leagues.length - a.leagues.length)
@@ -79,9 +76,9 @@ const Leaguemates = ({
                         type: 'user'
                     }
                 },
-                list: [
+                list: [[
                     {
-                        text: lm.username,
+                        text: lm.username || 'Orphan',
                         colSpan: 3,
                         className: 'left',
                         image: {
@@ -148,7 +145,7 @@ const Leaguemates = ({
                         colSpan: 2,
                         className: "green"
                     }
-                ],
+                ]],
                 secondary_table: (
                     <LeaguemateLeagues
                         stateAllPlayers={stateAllPlayers}

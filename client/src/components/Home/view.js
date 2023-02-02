@@ -7,6 +7,7 @@ import Leagues from '../Leagues/leagues';
 import Lineups from '../Lineups/lineups';
 import Players from '../Players/players';
 import Leaguemates from '../Leaguemates/leaguemates';
+import Trades from "../Trades/trades";
 
 const View = ({
     stateState,
@@ -15,7 +16,8 @@ const View = ({
     stateLeagues,
     stateLeaguemates,
     statePlayerShares,
-    stateMatchups
+    stateMatchups,
+    stateTrades
 }) => {
     const params = useParams();
     const navigate = useNavigate();
@@ -23,7 +25,7 @@ const View = ({
     const [statePlayerSharesFiltered, setStatePlayerSharesFiltered] = useState([]);
     const [stateLeaguematesFiltered, setStateLeaguematesFiltered] = useState([]);
     const [stateMatchupsFiltered, setStateMatchupsFiltered] = useState([]);
-    const [tab, setTab] = useState('Summary');
+    const [tab, setTab] = useState('Trades');
     const [type1, setType1] = useState('All');
     const [type2, setType2] = useState('All');
     const [lineupsTab, setLineupsTab] = useState('Weekly Rankings');
@@ -82,6 +84,14 @@ const View = ({
                 stateAllPlayers={stateAllPlayers}
                 state_user={state_user}
                 stateLeaguemates={stateLeaguematesFiltered}
+            />
+            break;
+        case 'Trades':
+            display = <Trades
+                stateState={stateState}
+                stateAllPlayers={stateAllPlayers}
+                state_user={state_user}
+                propTrades={stateTrades}
             />
             break;
         default:

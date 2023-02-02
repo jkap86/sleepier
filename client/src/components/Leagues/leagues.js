@@ -24,15 +24,12 @@ const Leagues = ({
             {
                 text: 'Rank',
                 colSpan: 1
-            },
-            {
-                text: 'Rank PF',
-                colSpan: 1
             }
         ]
     ]
 
     const leagues_body = stateLeagues.map(league => {
+        const total_games = league.userRoster.settings.wins + league.userRoster.settings.losses + league.userRoster.settings.ties
         return {
             id: league.league_id,
             search: {
@@ -43,7 +40,7 @@ const Leagues = ({
                     type: 'league'
                 }
             },
-            list: [
+            list: [[
                 {
                     text: league.name,
                     colSpan: 4,
@@ -60,9 +57,10 @@ const Leagues = ({
                     colSpan: 1
                 },
                 {
-                    text: (
-                        (league.userRoster.settings.wins) /
-                        (league.userRoster.settings.wins + league.userRoster.settings.losses + league.userRoster.settings.ties)
+                    text: (total_games > 0 ?
+                        (league.userRoster.settings.wins / total_games)
+                        :
+                        '--'
                     ).toLocaleString("en-US", { maximumFractionDigits: 4, minimumFractionDigits: 4 }).slice(1, 6),
                     colSpan: 1
                 },
@@ -72,15 +70,8 @@ const Leagues = ({
                     className: league.userRoster.rank / league.rosters.length <= .25 ? 'green' :
                         league.userRoster.rank / league.rosters.length >= .75 ? 'red' :
                             null
-                },
-                {
-                    text: league.userRoster.rank_points,
-                    colSpan: 1,
-                    className: league.userRoster.rank_points / league.rosters.length <= .25 ? 'green' :
-                        league.userRoster.rank_points / league.rosters.length >= .75 ? 'red' :
-                            null
                 }
-            ],
+            ]],
             secondary_table: (
                 <LeagueInfo
                     league={league}

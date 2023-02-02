@@ -17,7 +17,7 @@ const Main = () => {
     const [stateLeaguemates, setStateLeaguemates] = useState([]);
     const [statePlayerShares, setStatePlayerShares] = useState([]);
     const [stateMatchups, setStateMatchups] = useState([]);
-
+    const [stateTrades, setStateTrades] = useState([])
 
     useEffect(() => {
         const fetchData = async () => {
@@ -44,7 +44,7 @@ const Main = () => {
                 } catch (error) {
                     console.log(error)
                 }
-
+                console.log(user.data)
                 setSeasons_options(user.data.seasons)
                 setStateState({
                     ...user.data.state,
@@ -59,6 +59,7 @@ const Main = () => {
 
                 const data = getLeagueData(user.data.leagues, user.data.user_id, stateState, params.season)
 
+                setStateTrades(user.data.trades.trades)
                 setStateLeagues(user.data.leagues)
                 setStatePlayerShares(data.players)
                 setStateLeaguemates(data.leaguemates)
@@ -91,6 +92,7 @@ const Main = () => {
                             stateLeaguemates={stateLeaguemates}
                             statePlayerShares={statePlayerShares}
                             stateMatchups={stateMatchups}
+                            stateTrades={stateTrades}
                         />
                     </React.Suspense>
 

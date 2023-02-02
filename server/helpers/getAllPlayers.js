@@ -25,10 +25,6 @@ const getAllPlayers = async (axios, state) => {
     return sleeper_players
 }
 
-const getWeeklyRankings = async (axios, state, sleeper_players) => {
-
-}
-
 module.exports = {
     getAllPlayers: getAllPlayers
 }

@@ -1,35 +1,28 @@
+'use strict'
 const express = require('express')
 const app = express()
 const cors = require('cors')
 const compression = require('compression')
 const path = require('path')
 const NodeCache = require('node-cache');
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize');
 const https = require('https');
 const axios = require('axios').create({
     headers: {
         'content-type': 'application/json'
     },
     httpsAgent: new https.Agent({ rejectUnauthorized: false, keepAlive: true })
-})
-axios.defaults.timeout = 5000;
+});
 const axiosRetry = require('axios-retry');
-const puppeteer = require('puppeteer');
-const http = require('http').Server(app)
-const socketIO = require('socket.io')(http, {
-    cors: {
-        origin: "http://10.0.0.50:3000"
-    }
-})
-const PuppeteerMassScreenshots = require("./screen.shooter");
-const userAgent = require('user-agents');
+const http = require('http').Server(app);
 const { bootServer } = require('./syncs/bootServer');
-const { dailySync } = require('./syncs/daily_sync');
-const { getUser, updateUser, updateUser_Leagues } = require('./routes/user');
-const { trades_sync } = require('./syncs/trades_sync')
-const { getTrades } = require('./routes/trades')
-const { Playoffs_Scoring } = require('./syncs/playoffs_scoring')
+const { dailySync } = require('./syncs/dailySync');
+const { tradesSync } = require('./syncs/tradesSync');
+const { leaguemateSync } = require('./syncs/leaguemateSync');
+const { Playoffs_Scoring } = require('./syncs/playoffs_scoring');
 const { getPlayoffLeague } = require('./routes/league')
+const USER = require('./routes/user');
+const TRADES = require('./routes/trades');
 
 const myCache = new NodeCache;
 
@@ -40,13 +33,12 @@ app.use(express.static(path.resolve(__dirname, '../client/build')));
 
 const connectionString = process.env.DATABASE_URL || 'postgres://dev:password123@localhost:5432/dev'
 const ssl = process.env.HEROKU ? { rejectUnauthorized: false } : false
-const db = new Sequelize(connectionString, { logging: false, dialect: 'postgres', dialectOptions: { ssl: ssl, useUTC: false } })
-
+const db = new Sequelize(connectionString, { pool: { max: 100, min: 0, acquire: 30000, idle: 1000 }, logging: false, dialect: 'postgres', dialectOptions: { ssl: ssl, useUTC: false } })
 
 axiosRetry(axios, {
     retries: 3,
     retryCondition: (error) => {
-        return error.code === 'ECONNABORTED' ||
+        return error.code === 'ECONNABORTED' || error.code === 'ERR_BAD_REQUEST' ||
             axiosRetry.isNetworkError(error) || axiosRetry.isRetryableError(error);
     },
     retryDelay: (retryCount) => {
@@ -56,30 +48,12 @@ axiosRetry(axios, {
 })
 
 bootServer(app, axios, db)
-const date = new Date()
-const tzOffset = date.getTimezoneOffset()
-const tzOffset_ms = tzOffset * 60 * 1000
-const date_tz = new Date(date + tzOffset_ms)
 
-const hour = date_tz.getHours()
-const minute = date_tz.getMinutes()
+dailySync(app, axios)
 
-let delay;
-if (hour < 3) {
-    delay = (((3 - hour) * 60) + (60 - minute)) * 60 * 1000
-} else {
-    delay = (((27 - hour) * 60) + (60 - minute)) * 60 * 1000
-}
+leaguemateSync(app, axios)
 
-setTimeout(async () => {
-    setInterval(async () => {
-        dailySync(app, axios)
-        console.log(`Daily Sync completed at ${new Date()}`)
-    }, 24 * 60 * 60 * 1 * 1000)
-
-}, delay)
-console.log(`Daily Sync in ${Math.floor(delay / (60 * 60 * 1000))} hours`)
-
+tradesSync(app, axios)
 
 
 
@@ -87,17 +61,12 @@ console.log(`Daily Sync in ${Math.floor(delay / (60 * 60 * 1000))} hours`)
 const playoffs_sync = async () => {
     let scoring_interval = await Playoffs_Scoring(axios, app)
     console.log(`Next scoring update in ${Math.floor(scoring_interval / (60 * 60 * 1000))} hours, ${Math.floor(scoring_interval % (60 * 60 * 1000) / (60 * 1000))} minutes`)
-    setTimeout(() => {
-        playoffs_sync()
+    setTimeout(async () => {
+        await playoffs_sync()
     }, scoring_interval)
 }
 
-
 playoffs_sync()
-
-
-
-
 
 app.get('/playoffscores', async (req, res) => {
     const playoffs = app.get('playoffs_scoring')
@@ -144,35 +113,63 @@ app.get('/allplayers', (req, res) => {
 })
 
 app.get('/user', async (req, res, next) => {
-    const user = await getUser(axios, req)
-    if (!Object.keys(app.get('leagues_table')).includes(req.query.season)) {
+    const user = await USER.getUser(axios, req)
+
+    if (!Object.keys(app.get('leagues_table') || {}).includes(req.query.season)) {
         res.send('Invalid Season')
-    } else if (user?.user_id) {
+    } else if (!user?.user_id) {
+        res.send('Username Not Found')
+
+    } else {
         req.user = user
         next()
-    } else {
-        res.send('Username Not Found')
     }
 }, async (req, res, next) => {
-    const user_db = await updateUser(axios, app, req)
+    const user_db = await USER.updateUser(axios, app, req)
     req.user_db = user_db
     next();
 }, async (req, res, next) => {
-    const leagues_db = await updateUser_Leagues(axios, app, req)
-    const data = {
-        user_id: req.user_db.user.user_id,
-        username: req.user_db.user.username,
-        avatar: req.user_db.user.avatar,
-        seasons: Object.keys(app.get('leagues_table')),
-        leagues: leagues_db,
-        state: app.get('state')
-    }
-    res.send(data)
-})
+    const leagues_db = await USER.updateUser_Leagues(axios, app, req)
 
-app.get('/trades', async (req, res, next) => {
-    const trades_db = await getTrades(app)
-    res.send(trades_db)
+    let leaguemates = app.get('leaguemates')
+    if (!Object.keys(leaguemates).includes(req.query.season)) {
+        leaguemates[req.query.season] = {}
+    }
+
+    let leaguemate_ids = []
+    leagues_db.map(league => {
+        return league.rosters
+            .filter(r => r.user_id !== req.user_db.user_id)
+            .map(async roster => {
+                if (roster.user_id?.length > 1) {
+                    leaguemate_ids.push(roster.user_id)
+                    return leaguemates[req.query.season][roster.user_id] = {
+                        avatar: roster.avatar,
+                        user_id: roster.user_id,
+                        username: roster.username
+                    }
+                }
+            })
+    })
+
+    req.leagues = leagues_db
+    req.leaguemate_ids = Array.from(new Set(leaguemate_ids))
+    app.set('leaguemates', leaguemates)
+
+    next()
+}, async (req, res) => {
+    const trades_db = await TRADES.getTrades(app, req)
+    const data = {
+        user_id: req.user_db.user_id,
+        username: req.user_db.username,
+        avatar: req.user_db.avatar,
+        seasons: Object.keys(app.get('leagues_table')),
+        leagues: req.leagues,
+        state: app.get('state'),
+        trades: trades_db
+    }
+
+    res.send(data)
 })
 
 app.get('*', async (req, res) => {
@@ -183,3 +180,4 @@ const PORT = process.env.PORT || 5000;
 http.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
 });
+

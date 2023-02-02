@@ -2,20 +2,25 @@ const bootServer = require("./bootServer")
 
 
 const Playoffs_Scoring = async (axios, app) => {
-    const state = await app.get('state')
-    if (!state) {
+    const schedule_cur_week = await axios.get(`https://api.myfantasyleague.com/2022/export?TYPE=nflSchedule&W=&JSON=1`)
 
-        return 1000
-    }
     const rounds = ['Week_18', 'WC', 'DIV', 'CONF', 'SB']
-    const week = state.season_type === 'post' ? state.week : state.week - 18
+
+    let week;
+    if (schedule_cur_week.data.nflSchedule.matchup.find(x => x.gameSecondsRemaining !== "0")) {
+        week = schedule_cur_week.data.nflSchedule.week - 17
+    } else {
+        week = schedule_cur_week.data.nflSchedule.week - 18
+    }
+
+
     let schedule = await app.get('schedule')
     if (!schedule) {
         let schedule = {}
         let i = week
 
         while (i >= 0) {
-            const schedule_week = await axios.get(`https://api.myfantasyleague.com/${state.season}/export?TYPE=nflSchedule&W=${i + 18}&JSON=1`)
+            const schedule_week = await axios.get(`https://api.myfantasyleague.com/${2022}/export?TYPE=nflSchedule&W=${i + 18}&JSON=1`)
             schedule[rounds[i]] = schedule_week.data.nflSchedule.matchup
             i -= 1
         }
@@ -23,8 +28,8 @@ const Playoffs_Scoring = async (axios, app) => {
 
         let player_scores = {}
 
-        await Promise.all(Array.from(Array(4).keys())
-            .slice(0, state.week + 1)
+        await Promise.all(Array.from(Array(5).keys())
+            .slice(0, week + 1)
             .map(async key => {
                 let scores_dict_week = {};
                 let scores_week;
@@ -64,8 +69,8 @@ const Playoffs_Scoring = async (axios, app) => {
     }
     let player_scores = {}
 
-    await Promise.all(Array.from(Array(4).keys())
-        .slice(0, state.week + 1)
+    await Promise.all(Array.from(Array(5).keys())
+        .slice(0, week + 1)
         .map(async key => {
             let scores_dict_week = {};
             let scores_week;
@@ -90,7 +95,7 @@ const Playoffs_Scoring = async (axios, app) => {
 
     app.set('playoffs_scoring', player_scores)
 
-    const updated_schedule_week = await axios.get(`https://api.myfantasyleague.com/${state.season}/export?TYPE=nflSchedule&JSON=1`)
+    const updated_schedule_week = await axios.get(`https://api.myfantasyleague.com/${2022}/export?TYPE=nflSchedule&JSON=1`)
 
     schedule[rounds[updated_schedule_week.data.nflSchedule.week - 18]] = updated_schedule_week.data.nflSchedule.matchup
 

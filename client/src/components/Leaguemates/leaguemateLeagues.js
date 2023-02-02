@@ -80,7 +80,7 @@ const LeaguemateLeagues = ({ stateAllPlayers, state_user, leaguemate }) => {
                 className: 'half'
             },
             {
-                text: leaguemate.display_name,
+                text: leaguemate.username,
                 colSpan: 4,
                 className: 'half'
             },
@@ -97,14 +97,9 @@ const LeaguemateLeagues = ({ stateAllPlayers, state_user, leaguemate }) => {
                 className: 'half'
             },
             {
-                text: 'Ovr',
-                colSpan: 1,
-                className: 'small half'
-            },
-            {
-                text: 'PF',
-                colSpan: 1,
-                className: 'small half'
+                text: 'Rank',
+                colSpan: 2,
+                className: 'half'
             },
             {
                 text: 'Record',
@@ -112,22 +107,17 @@ const LeaguemateLeagues = ({ stateAllPlayers, state_user, leaguemate }) => {
                 className: 'half'
             },
             {
-                text: 'Ovr',
-                colSpan: 1,
-                className: 'small half'
-            },
-            {
-                text: 'PF',
-                colSpan: 1,
-                className: 'small half'
-            },
+                text: 'Rank',
+                colSpan: 2,
+                className: 'half'
+            }
         ]
     ]
 
     const leaguemateLeagues_body = leaguemate.leagues.map((lm_league) => {
         return {
             id: lm_league.league_id,
-            list: [
+            list: [[
                 {
                     text: lm_league.name,
                     colSpan: 4,
@@ -145,16 +135,9 @@ const LeaguemateLeagues = ({ stateAllPlayers, state_user, leaguemate }) => {
                 },
                 {
                     text: lm_league.lmRoster.rank,
-                    colSpan: 1,
+                    colSpan: 2,
                     className: lm_league.lmRoster.rank / lm_league.rosters.length <= .25 ? 'green' :
                         lm_league.lmRoster.rank / lm_league.rosters.length >= .75 ? 'red' :
-                            null
-                },
-                {
-                    text: lm_league.lmRoster.rank_points,
-                    colSpan: 1,
-                    className: lm_league.lmRoster.rank_points / lm_league.rosters.length <= .25 ? 'green' :
-                        lm_league.lmRoster.rank_points / lm_league.rosters.length >= .75 ? 'red' :
                             null
                 },
                 {
@@ -163,19 +146,12 @@ const LeaguemateLeagues = ({ stateAllPlayers, state_user, leaguemate }) => {
                 },
                 {
                     text: lm_league.userRoster.rank,
-                    colSpan: 1,
+                    colSpan: 2,
                     className: lm_league.userRoster.rank / lm_league.rosters.length <= .25 ? 'green' :
                         lm_league.userRoster.rank / lm_league.rosters.length >= .75 ? 'red' :
                             null
-                },
-                {
-                    text: lm_league.userRoster.rank_points,
-                    colSpan: 1,
-                    className: lm_league.userRoster.rank_points / lm_league.rosters.length <= .25 ? 'green' :
-                        lm_league.userRoster.rank_points / lm_league.rosters.length >= .75 ? 'red' :
-                            null
                 }
-            ]
+            ]]
         }
     })
 
@@ -188,7 +164,7 @@ const LeaguemateLeagues = ({ stateAllPlayers, state_user, leaguemate }) => {
                 className: 'half'
             },
             {
-                text: leaguemate.display_name,
+                text: leaguemate.username,
                 colSpan: 4,
                 onClick: () => sort('Leaguemate'),
                 className: 'half'
@@ -246,7 +222,7 @@ const LeaguemateLeagues = ({ stateAllPlayers, state_user, leaguemate }) => {
                         type: 'player'
                     }
                 },
-                list: [
+                list: [[
                     {
                         text: stateAllPlayers[player.id]?.full_name,
                         colSpan: 4,
@@ -273,7 +249,7 @@ const LeaguemateLeagues = ({ stateAllPlayers, state_user, leaguemate }) => {
                         text: stateAllPlayers[player.id] && (user_wins + '-' + user_losses + (user_ties > 0 ? `-${user_ties}` : '')),
                         colSpan: 3
                     }
-                ],
+                ]],
                 secondary_table: (
                     <LeaguematePlayersLeagues
                         state_user={state_user}

@@ -10,6 +10,12 @@ const trades = (db, season) => {
         league: {
             type: Sequelize.JSONB
         },
+        users: {
+            type: Sequelize.JSONB,
+        },
+        rosters: {
+            type: Sequelize.JSONB,
+        },
         status_updated: {
             type: Sequelize.STRING
         },
