@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { avatar } from '../Functions/misc';
+import './search.css';
 
 const Search = ({ id, sendSearched, placeholder, list }) => {
     const [searched, setSearched] = useState('')

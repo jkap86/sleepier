@@ -12,25 +12,28 @@ const Trades = ({
     const [stateTradesFiltered, setStateTradesFiltered] = useState([])
     const [page, setPage] = useState(1)
     const [itemActive, setItemActive] = useState('');
-    const [searched_player, setSearched_Player] = useState('')
     const [searched_manager, setSearched_Manager] = useState('')
-
+    const [searched_manager2, setSearched_Manager2] = useState('')
+    const [searched_player, setSearched_Player] = useState('')
+    const [searched_player2, setSearched_Player2] = useState('')
 
     useEffect(() => {
         setStateTrades(propTrades)
     }, [params.username])
+
 
     useEffect(() => {
         const filterTrades = () => {
             let trades = stateTrades
             let trades_filtered1;
             let trades_filtered2;
+            let trades_filtered3;
             if (searched_player === '') {
                 trades_filtered1 = trades
             } else {
                 trades_filtered1 = trades.filter(t => Object.keys(t.adds || {}).includes(searched_player.id))
             }
-            console.log({ searched_manager: searched_manager })
+
 
             if (searched_manager === '') {
                 trades_filtered2 = trades_filtered1
@@ -38,7 +41,15 @@ const Trades = ({
                 trades_filtered2 = trades_filtered1.filter(t => t.managers.find(m => m.user_id === searched_manager.id))
             }
 
-            setStateTradesFiltered([...trades_filtered2])
+            if (searched_player2 === '') {
+                trades_filtered3 = trades_filtered2
+            } else {
+                trades_filtered3 = trades_filtered2.filter(t =>
+                    (t.adds || {})[searched_player2.id] && (t.adds || {})[searched_player2.id] !== (t.adds || {})[searched_player.id]
+                )
+            }
+
+            setStateTradesFiltered([...trades_filtered3])
         }
 
         filterTrades()
@@ -188,19 +199,53 @@ const Trades = ({
 
     return <>
         <h4>{stateTradesFiltered.length} Trades</h4>
-        <div className="search_wrapper">
-            <Search
-                id={'By Player'}
-                sendSearched={(data) => setSearched_Player(data)}
-                placeholder={`Search By Player`}
-                list={players_list}
-            />
-            <Search
-                id={'By Manager'}
-                sendSearched={(data) => setSearched_Manager(data)}
-                placeholder={`Search By Manager`}
-                list={managers_list}
-            />
+        <div className="trade_search_wrapper">
+            {
+                searched_player === '' && searched_manager === '' ? null
+                    : <h4>Side 1</h4>
+            }
+            <div>
+                <Search
+                    id={'By Manager'}
+                    sendSearched={(data) => setSearched_Manager(data)}
+                    placeholder={`Manager`}
+                    list={managers_list}
+                />
+
+                <Search
+                    id={'By Player'}
+                    sendSearched={(data) => setSearched_Player(data)}
+                    placeholder={`Player`}
+                    list={players_list}
+                />
+
+            </div>
+            {
+                searched_player === '' && searched_manager === '' ? null
+                    :
+                    <>
+                        <h4>Side 2</h4>
+                        <div>
+                            {searched_manager === '' ? null :
+                                <Search
+                                    id={'By Manager2'}
+                                    sendSearched={(data) => setSearched_Manager2(data)}
+                                    placeholder={`Manager`}
+                                    list={managers_list}
+                                />
+                            }
+                            {searched_player === '' ? null :
+                                <Search
+                                    id={'By Player2'}
+                                    sendSearched={(data) => setSearched_Player2(data)}
+                                    placeholder={`Player`}
+                                    list={players_list}
+                                />
+                            }
+                        </div>
+                    </>
+            }
+
         </div>
         <TableMain
             id={'trades'}

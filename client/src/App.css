@@ -49,6 +49,10 @@ a {
   color: inherit;
 }
 
+h4 {
+  margin: .5rem auto;
+}
+
 h5 {
   position: absolute;
 }
@@ -666,7 +670,8 @@ div.primary.nav {
   margin-bottom: .5rem;
 }
 
-div.nav>select {
+div.nav>select,
+div.nav>label>select {
   border: none;
   width: fit-content;
   font-size: inherit;
@@ -768,7 +773,7 @@ tr.main2 ol.dropdown>li>button {
   font-size: 1.25rem;
 }
 
-div.search_wrapper {
+div.trade_search_wrapper>div {
   width: 50%;
   max-width: 50vh;
   margin: auto;
@@ -776,28 +781,6 @@ div.search_wrapper {
   display: flex;
   flex-direction: row;
   height: 5rem;
-}
-
-div.search_wrapper>img.thumbnail {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  margin-top: 1rem;
-  margin-left: 1rem;
-}
-
-input.search {
-  width: 50vmin;
-  font-size: 1.5rem;
-  padding-right: 2rem;
-  padding-left: 3.5rem;
-  text-align: left;
-  background-color: var(--color2);
-  border-radius: 1rem;
-  border: 1rem ridge var(--color3);
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 button.input {

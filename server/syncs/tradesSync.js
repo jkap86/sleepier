@@ -1,7 +1,7 @@
 
 
 const tradesSync = async (app, axios) => {
-    let interval = 60 * 1000
+    let interval = 5 * 60 * 1000
 
     setTimeout(async () => {
         await updateTrades(app, axios)
@@ -21,7 +21,7 @@ const updateTrades = async (app, axios) => {
     const state = app.get('state')
 
     let i = app.get('trades_sync_counter')
-    const increment = 300
+    const increment = 500
 
     const leagues_table = app.get('leagues_table')
     const trades_table = app.get('trades_table')
