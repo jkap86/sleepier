@@ -38,6 +38,7 @@ const updateTrades = async (app, axios) => {
     let transactions_week = []
 
     await Promise.all(leagues_to_update
+        .filter(x => x.dataValues.rosters)
         .map(async league => {
             let transactions_league;
 
