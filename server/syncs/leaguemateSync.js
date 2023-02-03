@@ -1,7 +1,7 @@
 const USER = require('../routes/user');
 
 const leaguemateSync = async (app, axios) => {
-    let interval = 60 * 1000
+    let interval = 2 * 60 * 1000
 
 
     setTimeout(async () => {

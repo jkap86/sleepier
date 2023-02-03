@@ -118,7 +118,7 @@ const Trades = ({
                                             .map(pick =>
                                                 <li>
                                                     {
-                                                        `+ ${pick.season} Round ${pick.round} (${pick.original_user?.username || 'Orphan'})`
+                                                        `+ ${pick.season} Round ${pick.round}${pick.order ? `.${pick.order.toLocaleString("en-US", { minimumIntegerDigits: 2 })}` : ` (${pick.original_user?.username || 'Orphan'})`}`
                                                     }
                                                 </li>
                                             )
@@ -140,7 +140,9 @@ const Trades = ({
                                             .sort((a, b) => (a.season) - b.season || a.round - b.round)
                                             .map(pick =>
                                                 <li className="end">
-                                                    <span>- {pick.season} Round {pick.round} {pick.original_user?.username || 'Orphan'}</span>
+                                                    <span>{
+                                                        `- ${pick.season} Round ${pick.round}${pick.order ? `.${pick.order.toLocaleString("en-US", { minimumIntegerDigits: 2 })}` : ` (${pick.original_user?.username || 'Orphan'})`}`
+                                                    }</span>
                                                 </li>
                                             )
                                     }
