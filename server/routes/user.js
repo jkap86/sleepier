@@ -212,7 +212,7 @@ const updateUser_Leagues = async (axios, app, req) => {
         )
 
         await app.get('leagues_table')[req.query.season].bulkCreate(new_leagues_batch, {
-            updateOnDuplicate: keys_to_add
+            ignoreDuplicates: true
         })
 
         j += increment_new
@@ -310,7 +310,7 @@ const updateUser_Leagues = async (axios, app, req) => {
         )
 
         await app.get('leagues_table')[req.query.season].bulkCreate(updated_leagues_batch, {
-            updateOnDuplicate: keys_to_update
+            ignoreDuplicates: true
         })
 
         i += increment
