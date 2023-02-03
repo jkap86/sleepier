@@ -144,20 +144,21 @@ const TableMain = ({ id, type, headers, body, page, setPage, itemActive, setItem
                                                                     )
                                                             }
                                                         </tr>
-                                                        {
-                                                            (itemActive !== item.id || !item.secondary_table) ? null :
-                                                                <tr className={`${type}2 click ${itemActive === item.id ? 'active' : ''}`}
-                                                                >
-                                                                    <td colSpan={list_item.reduce((acc, cur) => acc + cur.colSpan, 0)}>
-                                                                        {item.secondary_table}
-                                                                    </td>
-                                                                </tr>
-                                                        }
+
                                                     </tbody>
                                                 </table>
                                             </td>
                                         </tr>
                                     )
+                                }
+                                {
+                                    (itemActive !== item.id || !item.secondary_table) ? null :
+                                        <tr className={`${type}2 click ${itemActive === item.id ? 'active' : ''}`}
+                                        >
+                                            <td colSpan={item.list[0].reduce((acc, cur) => acc + cur.colSpan, 0)}>
+                                                {item.secondary_table}
+                                            </td>
+                                        </tr>
                                 }
                             </tbody>
                         )

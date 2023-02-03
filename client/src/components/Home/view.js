@@ -17,7 +17,8 @@ const View = ({
     stateLeaguemates,
     statePlayerShares,
     stateMatchups,
-    stateTrades
+    stateTrades,
+    stateTradePlayers
 }) => {
     const params = useParams();
     const navigate = useNavigate();
@@ -92,6 +93,7 @@ const View = ({
                 stateAllPlayers={stateAllPlayers}
                 state_user={state_user}
                 propTrades={stateTrades}
+                stateTradePlayers={stateTradePlayers}
             />
             break;
         default:

@@ -18,6 +18,7 @@ const Main = () => {
     const [statePlayerShares, setStatePlayerShares] = useState([]);
     const [stateMatchups, setStateMatchups] = useState([]);
     const [stateTrades, setStateTrades] = useState([])
+    const [stateTradePlayers, setStateTradePlayers] = useState({})
 
     useEffect(() => {
         const fetchData = async () => {
@@ -59,11 +60,20 @@ const Main = () => {
 
                 const data = getLeagueData(user.data.leagues, user.data.user_id, stateState, params.season)
 
-                setStateTrades(user.data.trades.trades)
+                const t = user.data.trades.trades
+                    .filter(t =>
+                        Object.keys(t.adds).find(
+                            a => Object.keys(user.data.trades.players_to_trade.owned).includes(t.adds[a])
+                                && Object.keys(user.data.trades.players_to_trade.owned[t.adds[a]]).includes(a)
+                        )
+                    )
+                setStateTradePlayers(user.data.trades.players_to_trade)
+                setStateTrades(t)
                 setStateLeagues(user.data.leagues)
                 setStatePlayerShares(data.players)
                 setStateLeaguemates(data.leaguemates)
                 setStateMatchups(data.matchups)
+
 
             }
 
@@ -93,6 +103,7 @@ const Main = () => {
                             statePlayerShares={statePlayerShares}
                             stateMatchups={stateMatchups}
                             stateTrades={stateTrades}
+                            stateTradePlayers={stateTradePlayers}
                         />
                     </React.Suspense>
 

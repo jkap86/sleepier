@@ -1,7 +1,7 @@
 
 
 const tradesSync = async (app, axios) => {
-    let interval = 5 * 60 * 1000
+    let interval = 1 * 60 * 1000
 
     setTimeout(async () => {
         await updateTrades(app, axios)
@@ -79,13 +79,25 @@ const updateTrades = async (app, axios) => {
                         }
                     })
 
+                    let adds = {}
+                    transaction.adds && Object.keys(transaction.adds).map(add => {
+                        const user = league.dataValues.rosters?.find(x => x.roster_id === transaction.adds[add])
+                        return adds[add] = user?.user_id
+                    })
+
+                    let drops = {}
+                    transaction.drops && Object.keys(transaction.drops).map(drop => {
+                        const user = league.dataValues.rosters?.find(x => x.roster_id === transaction.drops[drop])
+                        return drops[drop] = user?.user_id
+                    })
+
                     if (transaction.type === 'trade' && transaction.adds) {
                         return transactions_week.push({
                             transaction_id: transaction.transaction_id,
                             status_updated: transaction.status_updated,
                             managers: managers,
-                            adds: transaction.adds,
-                            drops: transaction.drops,
+                            adds: adds,
+                            drops: drops,
                             draft_picks: draft_picks,
                             league: {
                                 league_id: league.league_id,

@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import TableMain from "../Home/tableMain";
 import Search from "../Home/search";
+import TradeTargets from "./tradeTargets";
 
 const Trades = ({
     propTrades,
-    stateAllPlayers
+    stateAllPlayers,
+    stateTradePlayers
 }) => {
     const params = useParams();
     const [stateTrades, setStateTrades] = useState([])
@@ -21,7 +23,7 @@ const Trades = ({
         setStateTrades(propTrades)
     }, [params.username])
 
-    console.log({ drafts: propTrades.map(trade => trade.draft_picks) })
+
     useEffect(() => {
         const filterTrades = () => {
             let trades = stateTrades
@@ -107,7 +109,7 @@ const Trades = ({
                             {
                                 text: <ol>
                                     {
-                                        Object.keys(trade.adds || {}).filter(a => trade.adds[a] === m?.roster_id).map(player_id =>
+                                        Object.keys(trade.adds || {}).filter(a => trade.adds[a] === m?.user_id).map(player_id =>
                                             <li>+ {stateAllPlayers[player_id]?.full_name}</li>
                                         )
                                     }
@@ -130,7 +132,7 @@ const Trades = ({
                             {
                                 text: <ol>
                                     {
-                                        Object.keys(trade.drops || {}).filter(d => trade.drops[d] === m?.roster_id).map(player_id =>
+                                        Object.keys(trade.drops || {}).filter(d => trade.drops[d] === m?.user_id).map(player_id =>
                                             <li>- {stateAllPlayers[player_id]?.full_name}</li>
                                         )
                                     }
@@ -152,7 +154,14 @@ const Trades = ({
                             }
                         ]
                     })
-                ]
+                ],
+                secondary_table: (
+                    <TradeTargets
+                        trade={trade}
+                        stateTradePlayers={stateTradePlayers}
+                        stateAllPlayers={stateAllPlayers}
+                    />
+                )
             }
         })
 
