@@ -66,6 +66,11 @@ const Main = () => {
                             a => Object.keys(user.data.trades.players_to_trade.owned).includes(t.adds[a])
                                 && Object.keys(user.data.trades.players_to_trade.owned[t.adds[a]]).includes(a)
                         )
+                        ||
+                        Object.keys(t.drops).find(
+                            d => Object.keys(user.data.trades.players_to_trade.unowned).includes(t.drops[d])
+                                && Object.keys(user.data.trades.players_to_trade.unowned[t.drops[d]]).includes(d)
+                        )
                     )
                 setStateTradePlayers(user.data.trades.players_to_trade)
                 setStateTrades(t)
