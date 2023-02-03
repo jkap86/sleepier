@@ -1,7 +1,7 @@
 
 
 const tradesSync = async (app, axios) => {
-    let interval = 5 * 60 * 1000
+    let interval = 1 * 60 * 1000
 
     setTimeout(async () => {
         await updateTrades(app, axios)
@@ -53,6 +53,7 @@ const updateTrades = async (app, axios) => {
 
             return transactions_league.data
                 .map(transaction => {
+                    const draft_order = league.drafts.find(d => d.draft_order && d.status !== 'complete')?.draft_order
                     const managers = transaction.roster_ids.map(roster_id => {
                         const user = league.dataValues.rosters?.find(x => x.roster_id === roster_id)
 
@@ -72,8 +73,9 @@ const updateTrades = async (app, axios) => {
                             original_user: {
                                 user_id: roster.user_id,
                                 username: roster.username,
-                                avatar: roster.avatar
-                            }
+                                avatar: roster.avatar,
+                            },
+                            order: draft_order ? draft_order[roster.user_id] : null
                         }
                     })
 
@@ -101,7 +103,7 @@ const updateTrades = async (app, axios) => {
     )
 
     try {
-        await trades_table[state.league_season].bulkCreate(transactions_week, { updateOnDuplicate: ['drafts'] })
+        await trades_table[state.league_season].bulkCreate(transactions_week, { updateOnDuplicate: ['drafts', 'draft_picks'] })
     } catch (error) {
         console.log(error)
     }

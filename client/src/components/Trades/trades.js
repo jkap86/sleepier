@@ -21,7 +21,7 @@ const Trades = ({
         setStateTrades(propTrades)
     }, [params.username])
 
-    console.log({ propTrades: propTrades })
+    console.log({ drafts: propTrades.map(trade => trade.draft_picks) })
     useEffect(() => {
         const filterTrades = () => {
             let trades = stateTrades
