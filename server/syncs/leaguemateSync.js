@@ -45,32 +45,34 @@ const updateLeaguemates = async (app, axios) => {
                 }
             })
 
-            lm_leagues.push(user_db[`${season}_leagues`])
+            if (!(user_db.updatedAt > new Date(new Date() - (7 * 24 * 60 * 60 * 1000)))) {
+                lm_leagues.push(user_db[`${season}_leagues`])
 
-            const leagues_to_add = Array.from(new Set(lm_leagues.flat(2)))
+                const leagues_to_add = Array.from(new Set(lm_leagues.flat(2)))
 
-            const added_leagues = await USER.updateUser_Leagues(axios, app, {
-                league_ids: leagues_to_add,
-                query: {
-                    season: season
-                }
-            })
-
-            api_calls += (added_leagues.updated.length * 5)
-            api_calls += (added_leagues.new.length * ((season === state.season && state.season_type === 'regular') ? state.week : parseInt(season) > parseInt(state.season) ? 1 : 18))
-            /*
-                    let new_leagues = app.get('new_leagues')
-                    if (!Object.keys(new_leagues).includes(req.query.season)) {
-                        new_leagues[req.query.season] = []
+                const added_leagues = await USER.updateUser_Leagues(axios, app, {
+                    league_ids: leagues_to_add,
+                    query: {
+                        season: season
                     }
-            
-                    app.set('new_leagues', {
-                        ...new_leagues,
-                        [season]: [...new_leagues[req.query.season]]
-                    })
-            */
-            if (added_leagues.new.length > 0) {
-                console.log({ username: leaguemates[season][leaguemate_season]?.username, added_leagues: added_leagues.new.length })
+                })
+
+                api_calls += (added_leagues.updated.length * 5)
+                api_calls += (added_leagues.new.length * ((season === state.season && state.season_type === 'regular') ? state.week : parseInt(season) > parseInt(state.season) ? 1 : 18))
+                /*
+                        let new_leagues = app.get('new_leagues')
+                        if (!Object.keys(new_leagues).includes(req.query.season)) {
+                            new_leagues[req.query.season] = []
+                        }
+                
+                        app.set('new_leagues', {
+                            ...new_leagues,
+                            [season]: [...new_leagues[req.query.season]]
+                        })
+                */
+                if (added_leagues.new.length > 0) {
+                    console.log({ username: leaguemates[season][leaguemate_season]?.username, added_leagues: added_leagues.new.length })
+                }
             }
 
             let leaguemates_pending = leaguemates

@@ -1,7 +1,7 @@
 
 
 const tradesSync = async (app, axios) => {
-    let interval = 5 * 60 * 1000
+    let interval = 1 * 60 * 1000
 
     setTimeout(async () => {
         await updateTrades(app, axios)
