@@ -71,11 +71,11 @@ const updateTrades = async (app, axios) => {
                         return {
                             ...pick,
                             original_user: {
-                                user_id: roster.user_id,
-                                username: roster.username,
-                                avatar: roster.avatar,
+                                user_id: roster?.user_id,
+                                username: roster?.username,
+                                avatar: roster?.avatar,
                             },
-                            order: draft_order ? draft_order[roster.user_id] : null
+                            order: draft_order && roster?.user_id ? draft_order[roster?.user_id] : null
                         }
                     })
 

@@ -16,6 +16,7 @@ const getTrades = async (app, req) => {
 
 
     try {
+        /*
         trades = await trades_table[state.league_season].findAndCountAll({
             where: {
                 users: {
@@ -23,6 +24,8 @@ const getTrades = async (app, req) => {
                 }
             }
         })
+        */
+        trades = await trades_table[state.league_season].findAndCountAll({})
     } catch (error) {
         console.log(error)
     }
