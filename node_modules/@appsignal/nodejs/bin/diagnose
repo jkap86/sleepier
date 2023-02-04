@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+"use strict"
+
+const { Diagnose } = require("../dist/cli/diagnose")
+const diagnose = new Diagnose()
+diagnose.run()

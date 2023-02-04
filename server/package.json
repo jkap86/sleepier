@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@appsignal/nodejs": "^3.0.7",
     "axios": "^1.2.6",
     "axios-retry": "^3.4.0",
     "cheerio": "^1.0.0-rc.12",
